@@ -30,7 +30,7 @@ class DataFrame:
 
         data = self.df
         if slice_min:
-            data = data[data["time_min"] > 30]
+            data = data[data["time_min"] > slice_min]
 
         if not time:
             col_names = list(data.columns)
