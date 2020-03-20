@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import re
+import numpy
 
 
 class DataFrame:
@@ -14,7 +15,7 @@ class DataFrame:
         self.df = df
         self.freq = MiceDataMerger.data_freq[signal_type]
 
-    def get_pandas(self, time=False):
+    def get_pandas(self, time=True):
         data = self.df
         if not time:
             col_names = list(data.columns)
@@ -23,31 +24,20 @@ class DataFrame:
 
         return data
 
-    def sliced_data(self, slice_size, time=False):
-        if slice_size <= 0:
-            raise ValueError('{0} as number of slices is illegal argument'.format(slice_num))
+    def sliced_data(self, time=False, slice_min=0):
+        if slice_min < 0:
+            raise ValueError('{0} as number of slices is illegal argument'.format(slice_min))
 
         data = self.df
+        if slice_min:
+            data = data[data["time_min"] > 30]
+
         if not time:
             col_names = list(data.columns)
             col_names.remove('time_min')
             data = data[col_names]
 
-        row_num = data.shape[0]
-        slice_size = min(slice_size, row_num)
-        slice_num = row_num//slice_size
-        if row_num%slice_size != 0:
-            slice_num += 1
-
-        sliced_data, cur_index = [], 0
-        for i in range(slice_num):
-            if i < slice_num-1:
-                sliced_data.append(data[cur_index:cur_index+slice_size])
-                cur_index += slice_size
-            else:
-                sliced_data.append(data[cur_index:])
-
-        return sliced_data
+        return data
 
 
 class DataMerger:
