@@ -1,6 +1,7 @@
 import data_scheduler.lib_data_merger as mice_data
-from FeatureExtraction import getFeatures
+from FeatureExtraction import getfewFeatures, getallFeatures
 from compareFeatures import plotFeatures
+import matplotlib.pyplot as plt
 
 if __name__=='__main__':
     mice_data_dir = r'/Users/lucadisse/ETH/Master/FS20/StatsLab/CSV data files for analysis'
@@ -13,8 +14,14 @@ if __name__=='__main__':
     #data_glu_run = md.fetch_mouse_signal(165, 'sal', 'running')
     #data_sal_run = md.fetch_mouse_signal(165, 'nea', 'running')
 
-    #features = getFeatures(data_eth_run, print_feat=True)
+    #features = getfewFeatures(data_eth_run, print_feat=True)
     #print(features.shape[1])
 
-    plotFeatures(md)
+    #plotFeatures(md)
+
+    features = getallFeatures(md, signal='running', slice_min=30)
+    #features[features['treatment'] == "glu"].plot(subplots=True, sharex=True, figsize=(10, 10))
+    #plt.show()
+    #print(features.columns)
+
 

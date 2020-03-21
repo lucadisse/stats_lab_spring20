@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from FeatureExtraction import getFeatures
+from FeatureExtraction import getfewFeatures
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -13,7 +13,7 @@ def plotFeatures(mouse, signal='running'):
         for j in mouse_ids:
             data_gen = mouse.fetch_mouse_signal(j, i, signal)
             data = data_gen.sliced_data(time=True, slice_min=30)
-            features = getFeatures(data)
+            features = getfewFeatures(data, signal=signal)
             features["treatment"] = i
             features["mouse_id"] = j
             general_features = pd.concat([general_features, features], axis=0)
@@ -24,5 +24,5 @@ def plotFeatures(mouse, signal='running'):
     print(general_features.columns)
 
     sns.set(style="ticks", color_codes=True)
-    sns.catplot(x="treatment", y="left_brain_signal__variance", data=general_features)
+    sns.catplot(x="treatment", y=signal + '__sum_values', data=general_features)
     plt.show()
