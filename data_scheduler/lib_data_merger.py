@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import re
-import numpy
 
 
 class DataFrame:
@@ -58,7 +57,7 @@ class DataMerger:
 
 
 class MiceDataMerger(DataMerger):
-    treatments = set(['glu', 'eth', 'sal', 'sal'])
+    treatments = set(['glu', 'eth', 'sal', 'nea'])
     signals = set(['brain_signal', 'running', 'V_O2', 'V_CO2', 'RQ', 'Heat'])
 
     data_freq = {
@@ -79,8 +78,7 @@ class MiceDataMerger(DataMerger):
         'Heat': ['time_min', 'cal_min']
     }
 
-    file_regex = r'([0-9]+)-(glu|eth|res)-IG-[0-9]+_(Brain_signal|Heat|RQ|Running|V_CO2|V_O2).csv'
-
+    file_regex = r'([0-9]+)-(glu|eth|nea|sal)-IG-[0-9]+_(Brain_signal|Heat|RQ|Running|V_CO2|V_O2).csv'
     def __init__(self, dir):
         super().__init__(dir)
         self.mouse_data_file_map = {}
