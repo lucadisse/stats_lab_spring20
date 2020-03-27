@@ -5,14 +5,18 @@ import re
 
 class DataFrame:
 
-    def __init__(self, df, signal_type):
+    def __init__(self, df, signal_type, chunks = None):
         if df is None:
             raise ValueError('Provided None as data frame is illegal')
         if signal_type is None or signal_type not in MiceDataMerger.signals:
             raise ValueError('{0} was provided as signal type which is illegal type of signal'.format('signal_type'))
+        if chunks is None:
+            chunks = [(df['time_min'].min(), df['time_min'].max())]
 
         self.df = df
         self.freq = MiceDataMerger.data_freq[signal_type]
+        self.chunks = chunks
+        self.signal_type = signal_type
 
     def get_pandas(self, time=True):
         data = self.df
@@ -23,21 +27,85 @@ class DataFrame:
 
         return data
 
-    def sliced_data(self, time=False, slice_min=0):
+    def sliced_data(self, slice_min=0):
         if slice_min < 0:
             raise ValueError('{0} as number of slices is illegal argument'.format(slice_min))
 
         data = self.df
         if slice_min:
-            data = data[data["time_min"] > slice_min]
+            data = data[data["time_min"] >= slice_min]
 
-        if not time:
-            col_names = list(data.columns)
-            col_names.remove('time_min')
-            data = data[col_names]
+        i = 0
+        while i < len(self.chunks) and self.chunks[i][1] < slice_min:
+            i+=1
+        new_chunks = self.chunks[i:]
+        new_chunks[0] = (max(new_chunks[0][0], slice_min), new_chunks[0][1])
 
-        return data
+        return DataFrame(data, self.signal_type, chunks=new_chunks)
 
+    def leave_out_chunk(self, time_tuple):
+        if time_tuple is None:
+            raise ValueError('Leave out chunk is not supposed to be None value')
+
+        start_time, end_time = time_tuple
+        if start_time is None or end_time is None:
+            raise ValueError('None values provided as time stamps')
+
+        if start_time > end_time:
+            start_time, end_time = end_time, start_time
+
+        data = self.df
+        data = data[(data['time_min'] <= start_time) | (data['time_min'] >= end_time)]
+
+        new_chunks = []
+        for i in range(0, len(self.chunks)):
+            s, e = self.chunks[i]
+            if s >= start_time and e <= end_time:
+                continue
+            elif start_time > s and end_time < e:
+                s1, e1 = s, start_time
+                s2, e2 = end_time, e
+                new_chunks.append((s1, e1))
+                new_chunks.append((s2, e2))
+                continue
+            elif start_time >= s:
+                e = min(start_time, e)
+            elif end_time <= e:
+                s = max(s, end_time)
+
+            new_chunks.append((s, e))
+
+        return DataFrame(data, self.signal_type, chunks=new_chunks)
+
+    def leave_out_chunks(self, leave_out):
+        if leave_out is None or len(leave_out) <=0:
+            raise ValueError('Provided invalid array of leave_out chunks')
+
+        df = self
+        for leave_out_int in leave_out:
+              df = df.leave_out_chunk(leave_out_int)
+
+        return df
+
+    def partition_data(self, part_last, remove_shorter = False):
+        if part_last <=0:
+            raise ValueError('{0} as partition lasting time is not legal value'.format(part_last))
+        if 'time_min' not in list(self.df):
+            raise ValueError('Can not partition data frame by time because there is not time column in it')
+
+        chunked_data = []
+        for chunk in self.chunks:
+            start, end = chunk
+
+            s = start
+            while s+part_last <= end:
+                chunked_data.append(DataFrame(self.df[(self.df['time_min'] >= s) & (self.df['time_min'] < s+part_last)], self.signal_type, [(s, s+part_last)]))
+                s+=part_last
+
+            if not remove_shorter:
+                chunked_data.append(DataFrame(self.df[(self.df['time_min'] >= s) & (self.df['time_min'] < end)], self.signal_type, [(s, end)]))
+
+        return chunked_data
 
 class DataMerger:
 
