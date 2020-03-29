@@ -1,12 +1,13 @@
 import data_scheduler.lib_data_merger as mice_data
 from FeatureExtraction import getfewFeatures, getallFeatures
-from compareFeatures import plotFeatures
+from feature_visualization import plotFeatures
 import matplotlib.pyplot as plt
 
 if __name__=='__main__':
     mice_data_dir = r'C:\Users\lkokot\Desktop\ETHZ_STAT_MSC\sem_2\stats_lab\analysis\CSV data files for analysis'
     md = mice_data.MiceDataMerger(mice_data_dir)
     data_eth_run = md.fetch_mouse_signal(166, 'eth', 'running')
+    plotFeatures(md)
     #print(data_eth_run.get_pandas())
     # data_eth_run = data_eth_run.sliced_data(time=True, slice_min=30)
     #
