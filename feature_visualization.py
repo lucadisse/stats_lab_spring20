@@ -24,7 +24,7 @@ fc_parameters = {
 
 def plotFeatures(feature_data):
     #feature_data = featureDataPreparation(mouse, signal_type, brain_half, mouse_ids, treatments)
-    feature_list, feature_data, mouse_ids, treatments = feature_data
+    feature_list, feature_data, mouse_ids, treatments, chunk_duration = feature_data
     feature_number = len(feature_data.columns)
     subplot_position = 1
     for j in mouse_ids:
@@ -54,7 +54,7 @@ def plotFeatures(feature_data):
                     ax = fig.add_subplot(2, 2,subplot_position)
                     ax.plot(list(range(len(matched_indexes))), mouse.iloc[matched_indexes,f], label = str(treatments[k]))
                     plt.title('Mouse '+str(j))
-                    plt.xlabel("Data chunk")
+                    plt.xlabel("Data chunk ("+str(chunk_duration)+' Min.)')
                     plt.ylabel("Feature value")
                     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
                     fig.suptitle(str(feature_data.columns[f]), fontsize=16)
@@ -70,7 +70,7 @@ def plotFeatures(feature_data):
             for i, j in enumerate(axe.lines):
                 j.set_color(colors[i])
             plt.title('Mice ' + str(mouse_ids))
-            plt.xlabel("Data chunk")
+            plt.xlabel("Data chunk ("+str(chunk_duration)+' Min.)')
             plt.ylabel("Feature value")
             plt.legend(treatments , loc='upper right') #[a,b,c,d],treatments , loc='upper right'
     plt.show()
@@ -103,7 +103,7 @@ def plotFeatures(feature_data):
     plt.ylabel("Konzentration")
     plt.show()'''
 
-def featureDataPreparation(mouse, signal_type, brain_half = 'left', mouse_ids = [165, 166], treatments = ['glu', 'eth', 'sal', 'nea']):
+def featureDataPreparation(mouse,chunk_duration, signal_type, brain_half = 'left', mouse_ids = [165, 166], treatments = ['glu', 'eth', 'sal', 'nea']):
     if brain_half == 'right':
         column_value = md.col_names[signal_type][2]
     else:
@@ -113,7 +113,7 @@ def featureDataPreparation(mouse, signal_type, brain_half = 'left', mouse_ids = 
     for j in mouse_ids:
         for i in treatments:
             signal = mouse.fetch_mouse_signal(j, i, signal_type)
-            chunks = signal.partition_data(part_last=30, remove_shorter = True)
+            chunks = signal.partition_data(part_last=chunk_duration, remove_shorter = True)
             n = 1
             id = []
             for chunk in chunks:
@@ -132,7 +132,7 @@ def featureDataPreparation(mouse, signal_type, brain_half = 'left', mouse_ids = 
                                                   default_fc_parameters=fc_parameters)
             helper.append(extracted_features)
     feature_data = pd.concat(helper)
-    return(helper, feature_data, mouse_ids, treatments)
+    return(helper, feature_data, mouse_ids, treatments, chunk_duration)
 
 
 
@@ -145,7 +145,7 @@ def featureDataPreparation(mouse, signal_type, brain_half = 'left', mouse_ids = 
 if __name__=='__main__':
     mice_data_dir = r'C:\Users\marce\OneDrive - ETHZ\Education\ETH\Spring 2020\Statslab\Project_Neuroscience\dataset'
     md = mice_data.MiceDataMerger(mice_data_dir)
-    feature_data = featureDataPreparation(md, 'brain_signal')
+    feature_data = featureDataPreparation(md, chunk_duration=10, signal_type='brain_signal')
     plotFeatures(feature_data)
 #print(len(data_eth.get_pandas()))
     '''id = np.repeat(1, len(data_eth.get_pandas()))
