@@ -1,5 +1,6 @@
 import data_scheduler.lib_data_merger as mice_data
-import feature_generator.FeatureExtraction as extract_features
+import feature_generator.FeatureExtraction as feature_generator
+import classifier.LinearClassifier as LC
 #from compareFeatures import plotFeatures
 #import matplotlib.pyplot as plt
 
@@ -30,10 +31,10 @@ if __name__=='__main__':
     #print(signal.get_pandas(time=True))
     #print(signal.chunks)
     chunks = signal.partition_data(part_last=5)
-    #print('num of chunks:', len(chunks))
+    print('num of chunks:', len(chunks))
     for chunk in chunks:
         df = chunk.get_pandas(time=True)
-        #print(df['time_min'].min(), df['time_min'].max(), chunk.chunks)
+        print(df['time_min'].min(), df['time_min'].max(), chunk.chunks)
 
     fc_parameters = {
         "large_standard_deviation": [{"r": 0.05}, {"r": 0.1}],
@@ -49,8 +50,13 @@ if __name__=='__main__':
         "variance": None
     }
 
-    feature_generator = extract_features.FeatureExtractor(fc_parameters, md)
+    #for binary classification set target to "treatment"
+    #any other string will lead to multiclass classification
+    feature_generator = feature_generator.FeatureExtractor(fc_parameters, md, 'running', slice_min=30, target="group", part_last=10)
 
     features = feature_generator.getfewFeatures(165, 'running', 'glu', slice_min=30)
-    relevant_features = feature_generator.getallFeatures('running', slice_min=30)
+    relevant_features = feature_generator.relevantFeatures()
+    #print(relevant_features)
 
+    classifier = LC.LinearClassifier(relevant_features)
+    classifier.classify()
