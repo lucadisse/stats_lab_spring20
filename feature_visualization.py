@@ -51,19 +51,19 @@ def plotFeatures(feature_data):
             list_indexes.append(matched_indexes)
             for f in range(feature_number):
                     fig = plt.figure(num = f+1, figsize=(12,12))
-                    ax = fig.add_subplot(2, 2,subplot_position)
+                    ax = fig.add_subplot(3, 3,subplot_position)
                     ax.plot(list(range(len(matched_indexes))), mouse.iloc[matched_indexes,f], label = str(treatments[k]))
                     plt.title('Mouse '+str(j))
                     plt.xlabel("Data chunk ("+str(chunk_duration)+' Min.)')
                     plt.ylabel("Feature value")
                     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
-                    fig.suptitle(str(feature_data.columns[f]), fontsize=16)
+                    fig.suptitle(str(feature_data.columns[f]), fontsize=16, horizontalalignment='center', verticalalignment='top')
                     fig.tight_layout(pad=3.0)
         subplot_position += 1
         for ff in range(feature_number):
             fig = plt.figure(num=ff + 1, figsize=(12,12))
-            axe = fig.add_subplot(2, 2, 3)
-            colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728','#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
+            axe = fig.add_subplot(3, 3, 3)
+            colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']*len(mouse_ids)
             axe.plot(list(range(len(list_indexes[0]))), mouse.iloc[list_indexes[0],ff], list(range(len(list_indexes[1]))),
                      mouse.iloc[list_indexes[1],ff], list(range(len(list_indexes[2]))), mouse.iloc[list_indexes[2],ff],
                      list(range(len(list_indexes[3]))), mouse.iloc[list_indexes[3],ff], color = 'red')

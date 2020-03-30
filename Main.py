@@ -1,10 +1,10 @@
 import data_scheduler.lib_data_merger as mice_data
-from FeatureExtraction import getfewFeatures, getallFeatures
-from feature_visualization import plotFeatures
-import matplotlib.pyplot as plt
+import feature_generator.FeatureExtraction as extract_features
+#import matplotlib.pyplot as plt
+
 
 if __name__=='__main__':
-    mice_data_dir = r'C:\Users\lkokot\Desktop\ETHZ_STAT_MSC\sem_2\stats_lab\analysis\CSV data files for analysis'
+    mice_data_dir = r'/Users/lucadisse/ETH/Master/FS20/StatsLab/CSV data files for analysis'
     md = mice_data.MiceDataMerger(mice_data_dir)
     data_eth_run = md.fetch_mouse_signal(166, 'eth', 'running')
     plotFeatures(md)
@@ -28,13 +28,30 @@ if __name__=='__main__':
 
     signal = md.fetch_mouse_signal(166, 'eth', 'running')
     signal = signal.sliced_data(29.997)
-    print(signal.get_pandas(time=True))
-    print(signal.chunks)
+    #print(signal.get_pandas(time=True))
+    #print(signal.chunks)
     chunks = signal.partition_data(part_last=5)
-    print('num of chunks:', len(chunks))
+    #print('num of chunks:', len(chunks))
     for chunk in chunks:
         df = chunk.get_pandas(time=True)
-        print(df['time_min'].min(), df['time_min'].max(), chunk.chunks)
+        #print(df['time_min'].min(), df['time_min'].max(), chunk.chunks)
 
+    fc_parameters = {
+        "large_standard_deviation": [{"r": 0.05}, {"r": 0.1}],
+        "abs_energy": None,
+        "autocorrelation": [{"lag": 3}],
+        "variance": None,
+        "number_peaks": [{"n": 10}],
+        "count_above_mean": None,
+        "longest_strike_below_mean": None,
+        "mean": None,
+        "maximum": None,
+        "median": None,
+        "variance": None
+    }
 
+    feature_generator = extract_features.FeatureExtractor(fc_parameters, md)
+
+    features = feature_generator.getfewFeatures(165, 'running', 'glu', slice_min=30)
+    relevant_features = feature_generator.getallFeatures('running', slice_min=30)
 
