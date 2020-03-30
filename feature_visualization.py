@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(1, 'C:/Users/Massimo/PycharmProjects/Statslab')
+
 import data_scheduler.lib_data_merger as mice_data
 import matplotlib.pyplot as plt
 import numpy as np
