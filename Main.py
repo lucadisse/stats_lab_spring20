@@ -1,13 +1,15 @@
 import data_scheduler.lib_data_merger as mice_data
 import feature_generator.FeatureExtraction as extract_features
 #import matplotlib.pyplot as plt
+from feature_visualization import featureDataPreparation, plotFeatures
 
 
 if __name__=='__main__':
-    mice_data_dir = r'/Users/lucadisse/ETH/Master/FS20/StatsLab/CSV data files for analysis'
+    mice_data_dir = r'C:\Users\marce\OneDrive - ETHZ\Education\ETH\Spring 2020\Statslab\Project_Neuroscience\dataset'
     md = mice_data.MiceDataMerger(mice_data_dir)
+    feature_data = featureDataPreparation(md, chunk_duration=10, signal_type='brain_signal')
+    plotFeatures(feature_data)
     data_eth_run = md.fetch_mouse_signal(166, 'eth', 'running')
-    plotFeatures(md)
     #print(data_eth_run.get_pandas())
     # data_eth_run = data_eth_run.sliced_data(time=True, slice_min=30)
     #

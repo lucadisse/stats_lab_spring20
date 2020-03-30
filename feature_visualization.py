@@ -1,8 +1,5 @@
 import data_scheduler.lib_data_merger as mice_data
-from FeatureExtraction import getfewFeatures, getallFeatures
-from compareFeatures import plotFeatures
 import matplotlib.pyplot as plt
-import matplotlib as matlib
 import numpy as np
 import pandas as pd
 from tsfresh import extract_features
@@ -51,7 +48,7 @@ def plotFeatures(feature_data):
             list_indexes.append(matched_indexes)
             for f in range(feature_number):
                     fig = plt.figure(num = f+1, figsize=(12,12))
-                    ax = fig.add_subplot(3, 3,subplot_position)
+                    ax = fig.add_subplot(2, 2,subplot_position)
                     ax.plot(list(range(len(matched_indexes))), mouse.iloc[matched_indexes,f], label = str(treatments[k]))
                     plt.title('Mouse '+str(j))
                     plt.xlabel("Data chunk ("+str(chunk_duration)+' Min.)')
@@ -62,7 +59,7 @@ def plotFeatures(feature_data):
         subplot_position += 1
         for ff in range(feature_number):
             fig = plt.figure(num=ff + 1, figsize=(12,12))
-            axe = fig.add_subplot(3, 3, 3)
+            axe = fig.add_subplot(2, 2, 3)
             colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']*len(mouse_ids)
             axe.plot(list(range(len(list_indexes[0]))), mouse.iloc[list_indexes[0],ff], list(range(len(list_indexes[1]))),
                      mouse.iloc[list_indexes[1],ff], list(range(len(list_indexes[2]))), mouse.iloc[list_indexes[2],ff],
@@ -105,9 +102,9 @@ def plotFeatures(feature_data):
 
 def featureDataPreparation(mouse,chunk_duration, signal_type, brain_half = 'left', mouse_ids = [165, 166], treatments = ['glu', 'eth', 'sal', 'nea']):
     if brain_half == 'right':
-        column_value = md.col_names[signal_type][2]
+        column_value = mouse.col_names[signal_type][2]
     else:
-        column_value = md.col_names[signal_type][1]
+        column_value = mouse.col_names[signal_type][1]
     mouse_ids = mouse_ids
     helper = []
     for j in mouse_ids:
