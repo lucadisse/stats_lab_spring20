@@ -19,8 +19,13 @@ class DataFrame:
         self.signal_type = signal_type
 
     def get_pandas(self, time=True):
+        if time is None:
+            raise ValueError('time boolean is not allowed to have None value')
+
         data = self.df
-        if not time:
+        if time and 'time_min' not in list(self.df):
+            raise ValueError('Can not include time_min column because there is no such column in data frame')
+        elif not time and 'time_min' in list(self.df):
             col_names = list(data.columns)
             col_names.remove('time_min')
             data = data[col_names]
@@ -28,18 +33,15 @@ class DataFrame:
         return data
 
     def sliced_data(self, slice_min=0):
-        if slice_min < 0:
-            raise ValueError('{0} as number of slices is illegal argument'.format(slice_min))
+        if slice_min is None or slice_min < 0:
+            raise ValueError('{0} as a minute for data to be sliced at is illegal argument'.format(slice_min))
 
-        data = self.df
-        if slice_min:
-            data = data[data["time_min"] >= slice_min]
+        data = self.df[self.df["time_min"] >= slice_min]
 
-        i = 0
-        while i < len(self.chunks) and self.chunks[i][1] < slice_min:
-            i+=1
-        new_chunks = self.chunks[i:]
-        new_chunks[0] = (max(new_chunks[0][0], slice_min), new_chunks[0][1])
+        new_chunks = []
+        for chunk in self.chunks:
+            if chunk[1] >= slice_min:
+                new_chunks.append((max(chunk[0], slice_min), chunk[1]))
 
         return DataFrame(data, self.signal_type, chunks=new_chunks)
 
@@ -58,8 +60,8 @@ class DataFrame:
         data = data[(data['time_min'] <= start_time) | (data['time_min'] >= end_time)]
 
         new_chunks = []
-        for i in range(0, len(self.chunks)):
-            s, e = self.chunks[i]
+        for chunk in self.chunks:
+            s, e = chunk
             if s >= start_time and e <= end_time:
                 continue
             elif start_time > s and end_time < e:
@@ -68,9 +70,9 @@ class DataFrame:
                 new_chunks.append((s1, e1))
                 new_chunks.append((s2, e2))
                 continue
-            elif start_time >= s:
+            elif start_time > s:
                 e = min(start_time, e)
-            elif end_time <= e:
+            elif end_time < e:
                 s = max(s, end_time)
 
             new_chunks.append((s, e))
@@ -79,19 +81,21 @@ class DataFrame:
 
     def leave_out_chunks(self, leave_out):
         if leave_out is None or len(leave_out) <=0:
-            raise ValueError('Provided invalid array of leave_out chunks')
+            raise ValueError('Provided invalid array of leave out chunks')
 
         df = self
-        for leave_out_int in leave_out:
-              df = df.leave_out_chunk(leave_out_int)
+        for chunk in leave_out:
+              df = df.leave_out_chunk(chunk)
 
         return df
 
     def partition_data(self, part_last, remove_shorter = False):
-        if part_last <=0:
+        if part_last is None or part_last <=0:
             raise ValueError('{0} as partition lasting time is not legal value'.format(part_last))
+        if remove_shorter is None:
+            raise ValueError('remove_shorter argument is not allowed to be of value None')
         if 'time_min' not in list(self.df):
-            raise ValueError('Can not partition data frame by time because there is not time column in it')
+            raise ValueError('Can not partition data frame by time because there is no time column in it')
 
         chunked_data = []
         for chunk in self.chunks:
@@ -100,7 +104,7 @@ class DataFrame:
             s = start
             while s+part_last <= end:
                 chunked_data.append(DataFrame(self.df[(self.df['time_min'] >= s) & (self.df['time_min'] < s+part_last)], self.signal_type, [(s, s+part_last)]))
-                s+=part_last
+                s += part_last
 
             if not remove_shorter:
                 chunked_data.append(DataFrame(self.df[(self.df['time_min'] >= s) & (self.df['time_min'] < end)], self.signal_type, [(s, end)]))
@@ -147,6 +151,7 @@ class MiceDataMerger(DataMerger):
     }
 
     file_regex = r'([0-9]+)-(glu|eth|nea|sal)-IG-[0-9]+_(Brain_signal|Heat|RQ|Running|V_CO2|V_O2).csv'
+
     def __init__(self, dir):
         super().__init__(dir)
         self.mouse_data_file_map = {}
@@ -159,9 +164,11 @@ class MiceDataMerger(DataMerger):
                 continue
 
             mouse_data_id = (int(res.group(1)), res.group(2), res.group(3).lower())
+            if mouse_data_id[0] is None or mouse_data_id[1] is None or mouse_data_id[2] is None\
+                    or mouse_data_id[1] not in MiceDataMerger.treatments or mouse_data_id[2] not in MiceDataMerger.signals:
+                raise ValueError('File {0} is of wrong name format'.format(file))
             if mouse_data_id in self.mouse_data_file_map:
-                #TODO
-                pass
+                raise ValueError('There are two files in directory {0} that correspond to same mouse measurement identificator {1}'.format(self.dir, mouse_data_id))
 
             self.mouse_data_file_map[mouse_data_id]=os.path.join(self.dir, file)
 
