@@ -22,6 +22,7 @@ fc_parameters = {
 def plotFeatures(feature_data):
     #feature_data = featureDataPreparation(mouse, signal_type, brain_half, mouse_ids, treatments)
     feature_list, feature_data, mouse_ids, treatments, chunk_duration = feature_data
+    print(feature_data)
     feature_number = len(feature_data.columns)
     subplot_position = 1
     for j in mouse_ids:
@@ -100,12 +101,12 @@ def plotFeatures(feature_data):
     plt.ylabel("Konzentration")
     plt.show()'''
 
-def featureDataPreparation(mouse,chunk_duration, signal_type, brain_half = 'left', mouse_ids = [165, 166], treatments = ['glu', 'eth', 'sal', 'nea']):
+def featureDataPreparation(mouse,chunk_duration, signal_type, brain_half = 'left', mouse_ids = [165, 166, 167], treatments = ['glu', 'eth', 'sal', 'nea']):
     if brain_half == 'right':
         column_value = mouse.col_names[signal_type][2]
     else:
         column_value = mouse.col_names[signal_type][1]
-    mouse_ids = mouse_ids
+    #mouse_ids = mouse_ids
     helper = []
     for j in mouse_ids:
         for i in treatments:
