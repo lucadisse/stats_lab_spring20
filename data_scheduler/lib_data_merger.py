@@ -129,6 +129,7 @@ class DataMerger:
 
 
 class MiceDataMerger(DataMerger):
+
     treatments = set(['glu', 'eth', 'sal', 'nea'])
     signals = set(['brain_signal', 'running', 'V_O2', 'V_CO2', 'RQ', 'Heat'])
 
@@ -150,7 +151,8 @@ class MiceDataMerger(DataMerger):
         'Heat': ['time_min', 'cal_min']
     }
 
-    file_regex = r'([0-9]+)-(glu|eth|nea|sal)-IG-[0-9]+_(Brain_signal|Heat|RQ|Running|V_CO2|V_O2).csv'
+    #file_regex = r'([0-9]+)-(glu|eth|nea|sal)-IG-[0-9]+_(Brain_signal|Heat|RQ|Running|V_CO2|V_O2).csv'
+    file_regex = r'([0-9]+)-(glu|eth|nea|sal)-IG-[0-9]+_(Brain_signal|Running).csv'
 
     def __init__(self, dir):
         super().__init__(dir)

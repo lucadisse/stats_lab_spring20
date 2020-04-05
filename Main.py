@@ -52,7 +52,7 @@ if __name__=='__main__':
 
     #for binary classification set target to "treatment"
     #any other string will lead to multiclass classification
-    feature_generator = feature_generator.FeatureExtractor(fc_parameters, md, 'running', slice_min=30, target="group", part_last=10)
+    feature_generator = feature_generator.FeatureExtractor(fc_parameters, md, 'running', slice_min=30, target="treatment", part_last=10)
 
     features = feature_generator.getfewFeatures(165, 'running', 'glu', slice_min=30)
     relevant_features = feature_generator.relevantFeatures()
