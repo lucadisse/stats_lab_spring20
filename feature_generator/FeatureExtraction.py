@@ -13,11 +13,14 @@ class FeatureExtractor:
     y = pd.Series()
     collected_data = pd.DataFrame()
 
-    def __init__(self, feature_dict, md ,signal_type, slice_min=30, target="treatment", part_last=10):
+    def __init__(self, feature_dict, md ,signal_type, mouse_ids={165, 166}, slice_min=30, target="treatment", part_last=10):
         self.fc_parameters = feature_dict
         self.mouse_data = md
-
+        self.signal_type = signal_type
+        self.mouse_ids = mouse_ids
+        self.chunk_duration = part_last
         self.data_preparation(signal_type, slice_min, target, part_last)
+
 
 
     def getfewFeatures(self, mouse_id=165, signal_type='running', signal_treat='eth', slice_min=0):
@@ -37,6 +40,17 @@ class FeatureExtractor:
 
         return extracted_features
 
+    def getFeatures(self, brain_half = 'left'):
+        if brain_half == 'right':
+            column_value = self.mouse_data.col_names[self.signal_type][2]
+        elif brain_half == 'both':
+            column_value = self.mouse_data.col_names[self.signal_type][1:3]
+        else:
+            column_value = self.mouse_data.col_names[self.signal_type][1]
+        extracted_features = extract_features(self.collected_data, column_id='id', column_sort='time_min',
+                         column_value= column_value,
+                         default_fc_parameters= self.fc_parameters)
+        return extracted_features
 
     def relevantFeatures(self):
         features_filtered_direct = extract_relevant_features(self.collected_data, y = self.y, column_id='id', column_sort='time_min', default_fc_parameters=self.fc_parameters)
@@ -45,7 +59,7 @@ class FeatureExtractor:
 
 
     def data_preparation(self, signal_type='running', slice_min=30, target="treatment", part_last=10):
-        mouse_ids = {165, 166}
+        mouse_ids = self.mouse_ids
         mouse_map = list(iter.product(mouse_ids, self.mouse_data.treatments))
         target_map = []
         target_y = []
