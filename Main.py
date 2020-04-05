@@ -52,19 +52,7 @@ if __name__=='__main__':
 
     #for binary classification set target to "treatment"
     #any other string will lead to multiclass classification
-    feature_generator = feature_generator.FeatureExtractor(fc_parameters, md, 'brain_signal',
-                                                           mouse_ids={165, 166}, slice_min=30, target="group", part_last=10)
 
-    #features = feature_generator.collected_data
-
-    extracted_features = feature_generator.getFeatures(brain_half= 'right')
-    plot = plot.FeaturePlot(extracted_features, feature_generator)
-    pl = plot.plotFeatures(plot_type=  'all') # either plot_type = 'all' or
-                                                    # plot_type = ['subjectLineplot','overallLineplot','boxplot','histogram']
-                                                    # with 1,2,3,4 arguments or alternatively one of these 4 as a string
-    plt.show()
-    #print(plot.treatments)
-    #relevant_features = feature_generator.relevantFeatures()
 
     #print(relevant_features)
 

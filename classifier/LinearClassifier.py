@@ -2,6 +2,8 @@ from sklearn import linear_model
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import scale
+from sklearn.metrics import accuracy_score
+import os
 
 class LinearClassifier:
     feature_block = pd.DataFrame()
@@ -19,10 +21,11 @@ class LinearClassifier:
     def validateClassifier(self,fit, X_test, y_test):
         y_out = fit.predict(X_test)
         out_df = pd.DataFrame({'real_y':y_test, 'predicted_y':y_out})
+
+        acc_score = self.accuracy(out_df)
         print(out_df)
-
-
-    #def CV_for_chunck_size(self):
+        print("The accuracy score is: ", acc_score)
+        #self.getvalidationset()
 
 
     def classify(self):
@@ -34,4 +37,22 @@ class LinearClassifier:
         X_test = scale(X_test)
         fit = self.model.fit(X_train, y_train)
 
-        self.validateClassifier(fit, X_test, y_test)
+        return self.validateClassifier(fit, X_test, y_test)
+
+
+    def accuracy(self, out_df):
+        y_pred = out_df["predicted_y"]
+        y_true = out_df["real_y"]
+        score = accuracy_score(y_true, y_pred)
+        return score
+
+    def getvalidationset(self):
+        mice_data_dir = r'/Users/lucadisse/ETH/Master/FS20/StatsLab/CSV data files for analysis'
+        file_regex = r'167-(glu|eth|sal)-IG-[0-9]+_(Brain_signal|Running).csv'
+
+        for file in os.listdir(mice_data_dir):
+            mouse_data_file_path = os.path.join(mice_data_dir, file)
+            print(mouse_data_file_path)
+
+        data = pd.read_csv(mouse_data_file_path)
+        print(data)
